@@ -1,0 +1,35 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/activity_container"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical" >
+    
+	<android.support.v4.view.ViewPager
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/pager"
+    android:layout_width="match_parent"
+    android:layout_height="200dp"
+    tools:context="com.joncairo.android.todo.MainActivity" />
+
+	<LinearLayout
+	    android:id="@+id/button_text_container"
+	    android:layout_width="wrap_content"
+	    android:layout_height="match_parent"
+	    android:orientation="horizontal" >
+
+	    <EditText
+	        android:id="@+id/todo_text"
+	        android:layout_width="match_parent"
+	        android:layout_height="wrap_content"
+	        android:ems="10" >
+	        <requestFocus />
+	    </EditText>
+	    <Button
+	        android:id="@+id/enter_button"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:text="@string/enter_button" />
+	</LinearLayout>
+
+</LinearLayout>
+
