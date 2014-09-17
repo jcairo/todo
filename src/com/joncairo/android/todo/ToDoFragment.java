@@ -1,6 +1,7 @@
 package com.joncairo.android.todo;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
@@ -16,6 +17,7 @@ import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -86,15 +88,23 @@ public class ToDoFragment extends ListFragment {
             public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
                 switch (item.getItemId()) {
                 // heres where we handle all the button clicks in the action bar.
-                case R.id.item1:
+                case R.id.email:
                     Toast.makeText(getActivity(), "Option1 clicked",
                             Toast.LENGTH_SHORT).show();
+                    
                     break;
-                case R.id.item2:
+                case R.id.delete:
                     Toast.makeText(getActivity(), "Option2 clicked",
                             Toast.LENGTH_SHORT).show();
+                    //ListView mListView = getListView();
+                    //long[] longConverts = mListView.getCheckedItemIds();
+                    //private List<long> itemIds = new ArrayList<long>(Arrays.asList(longConverts));
                     break;
-
+                
+                case R.id.archive:
+                	Toast.makeText(getActivity(), "Option3 clicked",
+                			Toast.LENGTH_SHORT).show();
+                	break;
                 }
                 return false;
             }
@@ -158,7 +168,7 @@ public class ToDoFragment extends ListFragment {
 		}
 		
 		@Override
-	    public View getView(int position, View convertView, ViewGroup parent) {
+	    public View getView(final int position, View convertView, ViewGroup parent) {
 	        // If we weren't given a view, inflate one
 	        if (convertView == null) {
 	            convertView = getActivity().getLayoutInflater()
@@ -175,6 +185,25 @@ public class ToDoFragment extends ListFragment {
 	        CheckBox solvedCheckBox =
 	        		(CheckBox)convertView.findViewById(R.id.todo_list_item_doneCheckBox);
 	        solvedCheckBox.setChecked(t.getDone());
+
+	        
+	        // set up the checkbox check listner
+	        View row_layout_view = convertView;
+	        final CheckBox checkBox = (CheckBox) row_layout_view.findViewById(R.id.todo_list_item_doneCheckBox);
+	        // checkbox.setOnClickListener adapted from 
+	        // http://stackoverflow.com/questions/15941635/how-to-add-a-listener-for-checkboxes-in-an-adapter-view-android-arrayadapter
+	        checkBox.setOnClickListener(new View.OnClickListener() {
+				
+				@Override
+				public void onClick(View v) {
+					final boolean isChecked = checkBox.isChecked();
+					Log.v(TAG, "checbox clicked inside adapter");
+					// update the data model
+					mTodos.get(position).setDone(isChecked);
+					adapter.notifyDataSetChanged();				
+				}
+			});
+	        
 	        return convertView;
 		}
 	}

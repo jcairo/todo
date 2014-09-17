@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:id="@+id/item1"
-          android:title="Wow" />
+    <item android:id="@+id/email"
+          android:title="Email" />
          	
-
-    <item android:id="@+id/item2"
-          android:title="Hello" />
+    <item android:id="@+id/delete"
+          android:title="Delete" />
+    
+    <item android:id="@+id/archive"
+          android:title="Archive" />
 </menu>

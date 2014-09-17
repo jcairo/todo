@@ -83,11 +83,11 @@ public class ArchivedTodoFragment extends ListFragment {
 	        public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
 	        	switch (item.getItemId()) {
 	                // heres where we handle all the button clicks in the action bar.
-	                case R.id.item1:
+	                case R.id.email:
 	                    Toast.makeText(getActivity(), "Option1 clicked",
 	                            Toast.LENGTH_SHORT).show();
 	                    break;
-	                case R.id.item2:
+	                case R.id.delete:
 	                    Toast.makeText(getActivity(), "Option2 clicked",
 	                            Toast.LENGTH_SHORT).show();
 	                    break;

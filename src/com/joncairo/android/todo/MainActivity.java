@@ -37,6 +37,8 @@ public class MainActivity extends ActionBarActivity implements
 	ViewPager mViewPager;
 	Button mDoIt;
 	EditText mNewToDoName;
+	ToDoFragment mtoDoFragment;
+	ArchivedTodoFragment mArchivedToDoFragment;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -137,25 +139,23 @@ public class MainActivity extends ActionBarActivity implements
 			FragmentTransaction fragmentTransaction) {
 	}
 	
-	// http://developer.android.com/guide/topics/ui/controls/checkbox.html
-	// set up the checkbox onclick method
-	public void onCheckboxClicked(View view) {
-	    // Is the view now checked?
-	    boolean checked = ((CheckBox) view).isChecked();
-	    
-	    // Check which checkbox was clicked
-	    switch(view.getId()) {
-	        case R.id.todo_list_item_doneCheckBox:
-	            if (checked)
-	                // Put some meat on the sandwich
-	            	Log.v("todolistfragment", "checkbox clicked");
-	            else
-	                // Remove the meat
-	            break;
-	    }
-	}
-
-
+//	// http://developer.android.com/guide/topics/ui/controls/checkbox.html
+//	// set up the checkbox onclick method to toggle done/not done
+//	public void onCheckboxClicked(View view) {
+//	    // Is the view now checked?
+//	    boolean checked = ((CheckBox) view).isChecked();
+//	    
+//	    // Check which checkbox was clicked
+//	    switch(view.getId()) {
+//	        case R.id.todo_list_item_doneCheckBox:
+//	            if (checked)
+//	                // set the item to done
+//	            	Log.v("todolistfragment", "checkbox clicked");
+//	            else
+//	                // set the item to not done
+//	            break;
+//	    }
+//	}
 
 	/**
 	 * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
@@ -173,9 +173,11 @@ public class MainActivity extends ActionBarActivity implements
 			// Each page is referred to based on an integer index related to the tab
 			// selected
 			if (position == 0) {
-				return ToDoFragment.newInstance(position);			
+				mtoDoFragment = ToDoFragment.newInstance(position);
+				return mtoDoFragment;			
 			} else {
-				return ArchivedTodoFragment.newInstance(position);	
+				mArchivedToDoFragment = ArchivedTodoFragment.newInstance(position);
+				return mArchivedToDoFragment;	
 			}		
 		}
 
