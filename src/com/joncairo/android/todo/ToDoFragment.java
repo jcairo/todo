@@ -6,6 +6,7 @@ import java.util.Arrays;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
 import android.util.Log;
+import android.util.SparseBooleanArray;
 import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -24,11 +25,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class ToDoFragment extends ListFragment {
+	// the list of todos attached to the adapter
 	private ArrayList<Todo> mTodos;
 	private EditText mNewToDoName;
 	private Button mDoIt;
 	//private ArrayAdapter<Todo> adapter;
 	public ToDoAdapter adapter;
+	private ListView mListView;
 	private static final String TAG = "ToDoListFragment";
 	
 	@Override
@@ -94,11 +97,24 @@ public class ToDoFragment extends ListFragment {
                     
                     break;
                 case R.id.delete:
-                    Toast.makeText(getActivity(), "Option2 clicked",
-                            Toast.LENGTH_SHORT).show();
-                    //ListView mListView = getListView();
-                    //long[] longConverts = mListView.getCheckedItemIds();
-                    //private List<long> itemIds = new ArrayList<long>(Arrays.asList(longConverts));
+                	// delete the items selected
+                    mListView = getListView();
+                    SparseBooleanArray chosenItemsPositions = mListView.getCheckedItemPositions();
+                    Log.v("Multicheck check", chosenItemsPositions.toString());
+                    // now that we have the positions iterate through them and remove them
+                    // from the todolist then update the adapter
+					for (int index = 0; index<chosenItemsPositions.size(); index++){
+                    	if(chosenItemsPositions.valueAt(index)){
+                    		// this funky bit adjust for the fact that when we delete
+                    		// something from the arraylist of todoitems the positions
+                    		// in the list change. To adjust you just subtract the number
+                    		// of items already removed from the position your deleting.            
+                    		mTodos.remove(chosenItemsPositions.keyAt(index)-index);
+                    		adapter.notifyDataSetChanged();                 	
+                    	}
+                    }
+					// kindly close the menu for the wary user.
+                	mode.finish();
                     break;
                 
                 case R.id.archive:
@@ -206,6 +222,14 @@ public class ToDoFragment extends ListFragment {
 	        
 	        return convertView;
 		}
+	}
+	
+	// this is not yet used.
+	// this method should be used to add todos from the archived
+	// section back to the unarchived to do list.
+	public void addItemToToDoList(Todo toDoToBeAdded){
+		mTodos.add(toDoToBeAdded);
+		adapter.notifyDataSetChanged();
 	}
 }
 
