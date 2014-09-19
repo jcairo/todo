@@ -91,7 +91,7 @@ public class ArchivedToDoFragment extends BaseToDoFragment {
 
             @Override
             public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-                getActivity().getMenuInflater().inflate(R.menu.action_bar_menu,
+                getActivity().getMenuInflater().inflate(R.menu.archived_action_bar_menu,
                         menu);
                 return true;
             }
@@ -105,17 +105,17 @@ public class ArchivedToDoFragment extends BaseToDoFragment {
             public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
                 switch (item.getItemId()) {
                 // heres where we handle all the button clicks in the action bar.
-                case R.id.email:
+                case R.id.archived_email:
                     emailSelectedItems();
                     mode.finish();
                     break;
-                case R.id.delete:
+                case R.id.archived_delete:
                 	// call subroutine to delete the items currently selected				
 					deleteSelectedItems();				
                 	mode.finish();
                     break;
                 
-                case R.id.archive:
+                case R.id.unarchive:
                 	unArchiveSelectedItems();
                 	mode.finish();
                 	break;
