@@ -49,4 +49,15 @@ public class Todo {
 		return mToDoName;
 	}
 	
+	// This method formats the todo info in an email friendly manner
+	public String toStringEmailFormat(){
+		String toDoEmailable = this.getToDoName();
+		if (this.getDone()){
+			toDoEmailable += " [x]";
+		} else {
+			toDoEmailable += " [ ]";
+		}
+		return toDoEmailable;
+	}
+	
 }

@@ -13,14 +13,14 @@ import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.EditText;
-import android.widget.ListView;
+
+import com.joncairo.android.todo.ArchivedToDoFragment.OnToDoItemUnArchived;
+import com.joncairo.android.todo.ToDoFragment.OnToDoItemArchived;
 
 public class MainActivity extends ActionBarActivity implements
-		ActionBar.TabListener {
+		ActionBar.TabListener, OnToDoItemArchived, OnToDoItemUnArchived {
 
 	/**
 	 * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -38,8 +38,28 @@ public class MainActivity extends ActionBarActivity implements
 	Button mDoIt;
 	EditText mNewToDoName;
 	ToDoFragment mtoDoFragment;
-	ArchivedTodoFragment mArchivedToDoFragment;
+	ArchivedToDoFragment mArchivedToDoFragment;
 
+	// this is a communication method built to communicate between
+	// the todofragment and the activity itself.
+	// it should take the todo received and add it to the 
+	// archived todo list
+	public void onToDoArchived(Todo todo){
+		Log.v("main activity", "main activity sees archiving");
+		mArchivedToDoFragment.mTodos.add(todo);
+		mArchivedToDoFragment.adapter.notifyDataSetChanged();
+	}
+	
+	// this is a communication method built to communicate between
+	// the todofragment and the activity itself.
+	// it should take the todo received and add it to the 
+	// archived todo list
+	public void onToDoUnArchived(Todo todo){
+		Log.v("Main activity", "main activity sees unarchiving");
+		mtoDoFragment.mTodos.add(todo);
+		mtoDoFragment.adapter.notifyDataSetChanged();
+	}
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -56,28 +76,6 @@ public class MainActivity extends ActionBarActivity implements
 		// Set up the ViewPager with the sections adapter.
 		mViewPager = (ViewPager) findViewById(R.id.pager);
 		mViewPager.setAdapter(mSectionsPagerAdapter);
-	
-//		// Wire up the to do text entry field
-//		mNewToDoName = (EditText)findViewById(R.id.todo_text);
-//		
-//		// Wire up the to do enter button
-//		mDoIt = (Button)findViewById(R.id.enter_button);
-//		mDoIt.setOnClickListener( new View.OnClickListener() {	
-//			@Override
-//			public void onClick(View v) {
-//				// TODO get contents of the edittext field
-//				// then add this as a new to do to the to do array				
-//				String newToDoText = (String)mNewToDoName.getText().toString();
-//				Log.v("ButtonTextCheck", newToDoText);
-//				// Create a new todo instance 
-//				Todo newTodo = new Todo(newToDoText);
-//				// append it to the todolist array
-//				ToDoList mToDoList = ToDoList.get(getApplicationContext());
-//				mToDoList.add(newTodo);
-//				
-//			}
-//		});
-		
 
 		// When swiping between different sections, select the corresponding
 		// tab. We can also use ActionBar.Tab#select() to do this if we have
@@ -100,6 +98,7 @@ public class MainActivity extends ActionBarActivity implements
 					.setText(mSectionsPagerAdapter.getPageTitle(i))
 					.setTabListener(this));
 		}
+	
 	}
 
 	@Override
@@ -138,24 +137,6 @@ public class MainActivity extends ActionBarActivity implements
 	public void onTabReselected(ActionBar.Tab tab,
 			FragmentTransaction fragmentTransaction) {
 	}
-	
-//	// http://developer.android.com/guide/topics/ui/controls/checkbox.html
-//	// set up the checkbox onclick method to toggle done/not done
-//	public void onCheckboxClicked(View view) {
-//	    // Is the view now checked?
-//	    boolean checked = ((CheckBox) view).isChecked();
-//	    
-//	    // Check which checkbox was clicked
-//	    switch(view.getId()) {
-//	        case R.id.todo_list_item_doneCheckBox:
-//	            if (checked)
-//	                // set the item to done
-//	            	Log.v("todolistfragment", "checkbox clicked");
-//	            else
-//	                // set the item to not done
-//	            break;
-//	    }
-//	}
 
 	/**
 	 * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
@@ -174,9 +155,11 @@ public class MainActivity extends ActionBarActivity implements
 			// selected
 			if (position == 0) {
 				mtoDoFragment = ToDoFragment.newInstance(position);
+				// Log.v("tag of fragment", mtoDoFragment.getTag());
 				return mtoDoFragment;			
 			} else {
-				mArchivedToDoFragment = ArchivedTodoFragment.newInstance(position);
+				mArchivedToDoFragment = ArchivedToDoFragment.newInstance(position);
+				// Log.v("tag of fragment", mArchivedToDoFragment.getTag());
 				return mArchivedToDoFragment;	
 			}		
 		}

@@ -10,10 +10,10 @@ public class ToDoList {
     // create an
 	private ArrayList<Todo> mToDos;
     
-	private static ToDoList sToDoList;
+	private ToDoList sToDoList;
     private Context mAppContext;
     
-    private ToDoList(Context appContext) {
+    public ToDoList(Context appContext) {
         mAppContext = appContext;
         mToDos = new ArrayList<Todo>();
         // populate with dummy todos
@@ -37,7 +37,7 @@ public class ToDoList {
         return null;
     }
     
-    public static ToDoList get(Context c) {
+    public ToDoList get(Context c) {
         if (sToDoList == null) {
             sToDoList = new ToDoList(c.getApplicationContext());
         }
