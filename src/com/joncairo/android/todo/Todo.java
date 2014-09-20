@@ -29,16 +29,16 @@ public class Todo {
 	public void setArchived(Boolean archived) {
 		mArchived = archived;
 	}
-	public UUID getToDoId() {
-		return mToDoId;
-	}
+//	public UUID getToDoId() {
+//		return mToDoId;
+//	}
 	public Date getDateCreated() {
 		return mDateCreated;
 	}
 	
 	// To-do Constructor
 	public Todo(String todoname) {
-		mToDoId = UUID.randomUUID();
+		//mToDoId = UUID.randomUUID();
 		mDateCreated = new Date();
 		mDone = false;
 		mArchived = false;

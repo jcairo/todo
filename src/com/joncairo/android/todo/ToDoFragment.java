@@ -19,6 +19,7 @@ import android.widget.EditText;
 import android.widget.ListView;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonParser;
 
 public class ToDoFragment extends BaseToDoFragment {
 	public ArrayList<Todo> mTodos;
@@ -26,8 +27,10 @@ public class ToDoFragment extends BaseToDoFragment {
 	public Button mDoIt;
 	public ToDoAdapter adapter;
 	private ListView mListView;
+	private String mDataLoaderListName = "TO_DO_LIST";
 	private static final String TAG = "ToDoListFragment";
 	OnToDoItemArchived mToDoArchivedCallback;
+	DataLoader mDataLoader;
 	
 	// This interface should be implemented in parent activity
 	// it is used to communicate to the Archived todo fragment
@@ -62,15 +65,14 @@ public class ToDoFragment extends BaseToDoFragment {
         // the fragment is doing.
         // get the list of todos
         //mTodos = ToDoList.get(getActivity()).getTodos();
-        mTodos = new ToDoList(getActivity()).getTodos();
+        //mTodos = new ToDoList(getActivity()).getTodos();
         
-        
-        
-        // save the object and then reload it as a test
-        SharedPreferences sp = getActivity().getSharedPreferences("DB", 0);
-        Gson gson = new Gson();
-        String jsonString = gson.toJson(mTodos);
-        // mTodos =(ArrayList<Todo>) gson.fromJson(jsonString, ArrayList.class);
+        // call the dataloader and receive back a list of mTodos
+        // which is an arraylist of todos
+        mDataLoader = new DataLoader(getActivity(), "TO_DO_DATA");
+        mTodos = mDataLoader.getData("TO_DO_LIST");
+        //ToDoList mLoadedData = mDataLoader.getData(mDataLoaderListName);
+        //mTodos = mLoadedData.getTodos();
         
         
         
@@ -174,6 +176,13 @@ public class ToDoFragment extends BaseToDoFragment {
 			});                
 		}
 	
+	// heres where we need to save the state of the list
+	@Override 
+	public void onPause(){			
+		super.onPause();
+		mDataLoader.setData("TO_DO_LIST", mTodos);		
+	}
+		
 	static ToDoFragment newInstance(int num) {
 		ToDoFragment f = new ToDoFragment();
 		return f;

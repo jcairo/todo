@@ -24,17 +24,9 @@ public class ToDoList {
         	}		
     }
     
-    // return all the todos in the list
+    // return the array of todos
     public ArrayList<Todo> getTodos() {
     	return mToDos;
-    }
-    
-    public Todo getToDo(UUID id) {
-        for (Todo t : mToDos) {
-            if (t.getToDoId().equals(id))
-                return t;
-        }
-        return null;
     }
     
     public ToDoList get(Context c) {
@@ -46,5 +38,9 @@ public class ToDoList {
     
     public void add(Todo newToDo){
     	mToDos.add(newToDo);
+    }
+    
+    public void remove(Todo toDoToBeRemoved){
+    	mToDos.remove(toDoToBeRemoved);
     }
 }
