@@ -264,6 +264,9 @@ int id disableHome 0x7f050008
 int id dropdown 0x7f05000f
 int id edit_query 0x7f050030
 int id email 0x7f050045
+int id email_all 0x7f05004c
+int id email_all_archived 0x7f05004e
+int id email_all_todos 0x7f05004d
 int id end 0x7f050013
 int id enter_button 0x7f050040
 int id expand_activities_button 0x7f050026

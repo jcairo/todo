@@ -3,40 +3,46 @@ package com.joncairo.android.todo;
 import java.util.ArrayList;
 
 import android.app.Activity;
-import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.v4.app.ListFragment;
 import android.util.Log;
 import android.util.SparseBooleanArray;
 import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AbsListView.MultiChoiceModeListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemLongClickListener;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.TextView;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonParser;
+// import com.joncairo.android.todo.BaseToDoFragment.ToDoAdapter;
 
-public class ToDoFragment extends BaseToDoFragment {
+public class ToDoFragment extends ListFragment {
 	public ArrayList<Todo> mTodos;
 	public EditText mNewToDoName;
 	public Button mDoIt;
 	public ToDoAdapter adapter;
 	private ListView mListView;
-	private String mDataLoaderListName = "TO_DO_LIST";
 	private static final String TAG = "ToDoListFragment";
 	OnToDoItemArchived mToDoArchivedCallback;
 	DataLoader mDataLoader;
+	// this is the identifier set in the constructor as to whether the
+	// instance is the todolist or the archived todolist
+	String mKeyNameForToDoList;
+	
 	
 	// This interface should be implemented in parent activity
 	// it is used to communicate to the Archived todo fragment
 	// so that todos can be archived.
 	public interface OnToDoItemArchived{
-		public void onToDoArchived(Todo todo);
+		public void onToDoArchived(ArrayList<Todo> todos, String listName);
 	}
 	
 	// on attach method taken from
@@ -52,7 +58,7 @@ public class ToDoFragment extends BaseToDoFragment {
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString()
                     + " must implement OnToDoItemArchived");
-        }
+        }		
 	}
 	
 	@Override
@@ -70,7 +76,7 @@ public class ToDoFragment extends BaseToDoFragment {
         // call the dataloader and receive back a list of mTodos
         // which is an arraylist of todos
         mDataLoader = new DataLoader(getActivity(), "TO_DO_DATA");
-        mTodos = mDataLoader.getData("TO_DO_LIST");
+        mTodos = mDataLoader.getData(mKeyNameForToDoList);
         //ToDoList mLoadedData = mDataLoader.getData(mDataLoaderListName);
         //mTodos = mLoadedData.getTodos();
         
@@ -153,38 +159,37 @@ public class ToDoFragment extends BaseToDoFragment {
 	                }
 	                mode.setTitle(nr + " todos selected!");
 	            }
-	        });
-	        
-			// Wire up the to do text entry field
-			mNewToDoName = (EditText)getActivity().findViewById(R.id.todo_text);
-			
-			// Wire up the to do enter button
-			mDoIt = (Button)getActivity().findViewById(R.id.enter_button);
-			mDoIt.setOnClickListener( new View.OnClickListener() {	
-				@Override
-				public void onClick(View v) {
-					// then add this as a new to do to the to do array				
-					String newToDoText = (String)mNewToDoName.getText().toString();
-					Log.v("ButtonTextCheck", newToDoText);
-					// Create a new todo instance 
-					Todo newTodo = new Todo(newToDoText);
-					// append it to the todolist array
-					//adapter.setNotifyOnChange(true);
-					mTodos.add(0, newTodo);	
-					adapter.notifyDataSetChanged();
-				}
-			});                
+	        });               
 		}
 	
+	public void onListItemClick(ListView listView, View v, int position, long id) {
+        //Todo t = (Todo)(getListAdapter()).getItem(position);
+		Todo t = ((ToDoAdapter)getListAdapter()).getItem(position);
+	   	if (t.getDone()){
+	   		t.setDone(false);
+	   	} else {
+	   		t.setDone(true);
+    	}
+    	Log.v("TAG", "List item clicked");
+    }		
+	
+		
+		
 	// heres where we need to save the state of the list
 	@Override 
 	public void onPause(){			
 		super.onPause();
-		mDataLoader.setData("TO_DO_LIST", mTodos);		
+		Log.v("DATASAVETEST", mTodos.toString());
+		mDataLoader.setData(this.mKeyNameForToDoList, mTodos);
+		
 	}
 		
-	static ToDoFragment newInstance(int num) {
+	static ToDoFragment newInstance(int num, String storageKeyNameForToDoList) {
 		ToDoFragment f = new ToDoFragment();
+		// set the key name so the todolist references the todos
+		// and the archived list refernces the archived list.
+		f.mKeyNameForToDoList = storageKeyNameForToDoList;
+		// this variable identifies the list as either the todo list or the archived todo list
 		return f;
 	}
 	
@@ -193,21 +198,24 @@ public class ToDoFragment extends BaseToDoFragment {
         SparseBooleanArray chosenItemsPositions = mListView.getCheckedItemPositions();
         // now that we have the positions iterate through them and remove them
         // from the todolist then update the adapter
-		for (int index = 0; index<chosenItemsPositions.size(); index++){
+		// build arraylist of todos to pass to the archive
+        ArrayList<Todo> mToDosToBeArchived = new ArrayList<Todo>();
+        for (int index = 0; index<chosenItemsPositions.size(); index++){
         	if(chosenItemsPositions.valueAt(index)){
-        		Todo toDoToBeArchived = mTodos.get(index);
-        		mToDoArchivedCallback.onToDoArchived(toDoToBeArchived);
+        		Todo toDoToBeArchived = mTodos.get(index-index);
+        		mToDosToBeArchived.add(toDoToBeArchived);
         		// this funky bit adjust for the fact that when we delete
         		// something from the arraylist of todoitems the positions
         		// in the list change. To adjust you just subtract the number
         		// of items already removed from the position your deleting.            
-        		mTodos.remove(chosenItemsPositions.keyAt(index));
+        		mTodos.remove(chosenItemsPositions.keyAt(index)-index);
         		adapter.notifyDataSetChanged();                 	
         	}
         }	
+
+        mToDoArchivedCallback.onToDoArchived(mToDosToBeArchived, this.mKeyNameForToDoList);
 	}
 	
-	@Override
 	public void deleteSelectedItems(){
     	mListView = getListView();
         SparseBooleanArray chosenItemsPositions = mListView.getCheckedItemPositions();
@@ -219,9 +227,94 @@ public class ToDoFragment extends BaseToDoFragment {
         		// something from the arraylist of todoitems the positions
         		// in the list change. To adjust you just subtract the number
         		// of items already removed from the position your deleting.            
+        		//removeItemFromToDoList(chosenItemsPositions.keyAt(index)-index);
         		mTodos.remove(chosenItemsPositions.keyAt(index)-index);
-        		adapter.notifyDataSetChanged();                 	
+        		adapter.notifyDataSetChanged(); 
         	}
         }
+	}
+	
+	public void emailSelectedItems(){
+		mListView = getListView();
+		SparseBooleanArray chosenItemsPositions = mListView.getCheckedItemPositions();
+		Emailer emailer = new Emailer(getActivity());
+		emailer.emailSparseBooleanArray(chosenItemsPositions, mTodos);
+	}
+
+	// create the custom adapter which manages the list of todo's
+	// adapted from The Big Nerd Ranch Guide p 189
+	class ToDoAdapter extends ArrayAdapter<Todo> {
+		public ToDoAdapter(ArrayList<Todo> todo) {
+			super(getActivity(), 0, todo);
+		}
+		
+		@Override
+	    public View getView(final int position, View convertView, ViewGroup parent) {
+	        // If we weren't given a view, inflate one
+	        if (convertView == null) {
+	            convertView = getActivity().getLayoutInflater()
+	                .inflate(R.layout.list_view_layout, null);
+	        }
+	        // Configure the view for the todo
+	        Todo t = getItem(position);
+	        TextView titleTextView =
+	        		(TextView)convertView.findViewById(R.id.todo_list_item_titleTextView);
+	        titleTextView.setText(t.getToDoName());
+	        TextView dateTextView =
+	        		(TextView)convertView.findViewById(R.id.todo_list_item_dateTextView);
+	        dateTextView.setText(t.getDateCreated().toString());
+	        CheckBox solvedCheckBox =
+	        		(CheckBox)convertView.findViewById(R.id.todo_list_item_doneCheckBox);
+	        solvedCheckBox.setChecked(t.getDone());
+
+	        
+	        // set up the checkbox check listner
+	        View row_layout_view = convertView;
+	        final CheckBox checkBox = (CheckBox) row_layout_view.findViewById(R.id.todo_list_item_doneCheckBox);
+	        // checkbox.setOnClickListener adapted from 
+	        // http://stackoverflow.com/questions/15941635/how-to-add-a-listener-for-checkboxes-in-an-adapter-view-android-arrayadapter
+	        checkBox.setOnClickListener(new View.OnClickListener() {
+				
+				@Override
+				public void onClick(View v) {
+					final boolean isChecked = checkBox.isChecked();
+					Log.v(TAG, "checbox clicked inside adapter");
+					// update the data model
+					mTodos.get(position).setDone(isChecked);
+					adapter.notifyDataSetChanged();				
+				}
+			});
+	        
+	        return convertView;
+		}
+	}
+	
+	public void addItemToToDoList(ArrayList<Todo> toDosToBeAdded, String fromListName){
+		// the from listName variable represents which list the todos
+		// are coming from, so if they come from archivedlist we setArchive property
+		// to be false on each before they are entered and vis a vis when from the 
+		// todolist. When something is added from the task input field we just pass
+		// in an empty string so the archiving doesn't get set as its set to unarchived
+		// by default on entry.
+		for (int i = 0; i < toDosToBeAdded.size(); i++){
+			Todo todo = toDosToBeAdded.get(i);
+			// if the todo is coming from the todolist we
+			// we need to set it as an archived to do.
+			// otherwise its come from the archive and
+			// needs to be unarchived.
+			if (fromListName == "TODOLIST"){
+				todo.setArchived(true);
+			} else if (fromListName == "ARCHIVEDTODOLIST") { 
+				todo.setArchived(false);
+			} else {
+				// this is a little akward I know
+				// if the to do is coming from the input text
+				// box setArchive does not need to be set
+				// so we pass in an empty string to dodge the above
+				// conditions
+			}
+			mTodos.add(0, todo);
+			adapter.notifyDataSetChanged();
+		}
 	}
 }

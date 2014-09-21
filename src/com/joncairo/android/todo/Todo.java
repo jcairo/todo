@@ -57,6 +57,9 @@ public class Todo {
 		} else {
 			toDoEmailable += " [ ]";
 		}
+		if (this.getArchived()){
+			toDoEmailable += " Archived";
+		}
 		return toDoEmailable;
 	}
 	

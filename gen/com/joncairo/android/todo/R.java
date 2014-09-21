@@ -1109,6 +1109,9 @@ containing a value of this type.
         public static final int dropdown=0x7f05000f;
         public static final int edit_query=0x7f050030;
         public static final int email=0x7f050045;
+        public static final int email_all=0x7f05004c;
+        public static final int email_all_archived=0x7f05004e;
+        public static final int email_all_todos=0x7f05004d;
         public static final int end=0x7f050013;
         public static final int enter_button=0x7f050040;
         public static final int expand_activities_button=0x7f050026;

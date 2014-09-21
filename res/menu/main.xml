@@ -6,7 +6,22 @@
     <item
         android:id="@+id/action_settings"
         android:orderInCategory="100"
-        android:title="@string/action_settings"
+        android:title="Settings"
         app:showAsAction="never"/>
+    <item
+        android:id="@+id/email_all"
+        android:orderInCategory="100"
+        android:title="Email All"
+        app:showAsAction="never"/>
+    <item
+        android:id="@+id/email_all_todos"
+        android:orderInCategory="100"
+        android:title="Email Todos"
+        app:showAsAction="never"/>
+    <item
+        android:id="@+id/email_all_archived"
+        android:orderInCategory="100"
+        android:title="Email Archived"
+        app:showAsAction="never"/>    
 
 </menu>

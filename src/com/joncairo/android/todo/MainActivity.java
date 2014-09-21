@@ -1,5 +1,6 @@
 package com.joncairo.android.todo;
 
+import java.util.ArrayList;
 import java.util.Locale;
 
 import android.os.Bundle;
@@ -13,14 +14,14 @@ import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
-import com.joncairo.android.todo.ArchivedToDoFragment.OnToDoItemUnArchived;
 import com.joncairo.android.todo.ToDoFragment.OnToDoItemArchived;
 
 public class MainActivity extends ActionBarActivity implements
-		ActionBar.TabListener, OnToDoItemArchived, OnToDoItemUnArchived {
+		ActionBar.TabListener, OnToDoItemArchived {
 
 	/**
 	 * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -38,16 +39,25 @@ public class MainActivity extends ActionBarActivity implements
 	Button mDoIt;
 	EditText mNewToDoName;
 	ToDoFragment mtoDoFragment;
-	ArchivedToDoFragment mArchivedToDoFragment;
+	ToDoFragment mArchivedToDoFragment;
+	String mAppDataFileName = "TODODATAKEY";
 
 	// this is a communication method built to communicate between
 	// the todofragment and the activity itself.
 	// it should take the todo received and add it to the 
 	// archived todo list
-	public void onToDoArchived(Todo todo){
-		Log.v("main activity", "main activity sees archiving");
-		mArchivedToDoFragment.mTodos.add(todo);
-		mArchivedToDoFragment.adapter.notifyDataSetChanged();
+	public void onToDoArchived(ArrayList<Todo> todos, String listName){
+		// here we need to check which list is sending the todos
+		// to be archived/unarchived and use that info to add them to the appropriate
+		// list
+		// if we are adding to the archive the message is coming from the 
+		// "TODOLIST", if its coming the "ARCHIVEDTODOLIST then we add it
+		// to the TODOLIST
+		if (listName == "TODOLIST"){
+			mArchivedToDoFragment.addItemToToDoList(todos, listName);
+		} else if (listName == "ARCHIVEDTODOLIST") {
+			mtoDoFragment.addItemToToDoList(todos, listName);
+		}
 	}
 	
 	// this is a communication method built to communicate between
@@ -98,7 +108,25 @@ public class MainActivity extends ActionBarActivity implements
 					.setText(mSectionsPagerAdapter.getPageTitle(i))
 					.setTabListener(this));
 		}
-	
+		
+		// Wire up the to do text entry field
+		final EditText mNewToDoName = (EditText)findViewById(R.id.todo_text);					
+		// Wire up the to do enter button
+		Button mDoIt = (Button)findViewById(R.id.enter_button);
+		mDoIt.setOnClickListener( new View.OnClickListener() {	
+			@Override
+			public void onClick(View v) {
+			ArrayList<Todo> mToDoToBeAdded = new ArrayList<Todo>();
+			// then add this as a new to do to the to do array				
+			String newToDoText = (String)mNewToDoName.getText().toString();
+			Log.v("ButtonTextCheck", newToDoText);
+			// Create a new todo instance 
+				Todo newTodo = new Todo(newToDoText);
+				mToDoToBeAdded.add(newTodo);
+				// append it to the todolist array
+				mtoDoFragment.addItemToToDoList(mToDoToBeAdded, "");	
+			}
+		}); 
 	}
 
 	@Override
@@ -113,11 +141,35 @@ public class MainActivity extends ActionBarActivity implements
 		// Handle action bar item clicks here. The action bar will
 		// automatically handle clicks on the Home/Up button, so long
 		// as you specify a parent activity in AndroidManifest.xml.
-		int id = item.getItemId();
-		if (id == R.id.action_settings) {
-			return true;
+		
+		// create the emailer
+		Emailer emailer = new Emailer(this);
+		switch (item.getItemId()) {
+			case R.id.email_all:
+				// get a list of all todos and send the email
+				ArrayList<Todo> todosArrayAggregator = mtoDoFragment.mTodos;
+				ArrayList<Todo> todosArrayArchivedToBeAdded = mArchivedToDoFragment.mTodos;
+				// concatenate the arraylists
+				todosArrayAggregator.addAll(todosArrayArchivedToBeAdded);
+				emailer.emailArrayList(todosArrayAggregator);
+				return true;
+			case R.id.email_all_todos:
+				ArrayList<Todo> todosArray = mtoDoFragment.mTodos;
+				emailer.emailArrayList(todosArray);			
+				// get a list of all todos and email
+				return true;
+			case R.id.email_all_archived:
+				ArrayList<Todo> todosArrayArchived = mArchivedToDoFragment.mTodos;
+				emailer.emailArrayList(todosArrayArchived);	
+				return true;
+	        default:
+	            return super.onOptionsItemSelected(item);
 		}
-		return super.onOptionsItemSelected(item);
+//		int id = item.getItemId();
+//		if (id == R.id.action_settings) {
+//			return true;
+//		}
+//		return super.onOptionsItemSelected(item);
 	}
 
 	@Override
@@ -154,11 +206,11 @@ public class MainActivity extends ActionBarActivity implements
 			// Each page is referred to based on an integer index related to the tab
 			// selected
 			if (position == 0) {
-				mtoDoFragment = ToDoFragment.newInstance(position);
+				mtoDoFragment = ToDoFragment.newInstance(position, "TODOLIST");
 				// Log.v("tag of fragment", mtoDoFragment.getTag());
 				return mtoDoFragment;			
 			} else {
-				mArchivedToDoFragment = ArchivedToDoFragment.newInstance(position);
+				mArchivedToDoFragment = ToDoFragment.newInstance(position, "ARCHIVEDTODOLIST");
 				// Log.v("tag of fragment", mArchivedToDoFragment.getTag());
 				return mArchivedToDoFragment;	
 			}		
@@ -183,5 +235,4 @@ public class MainActivity extends ActionBarActivity implements
 			return null;
 		}
 	}
-
 }
