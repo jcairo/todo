@@ -4,11 +4,6 @@
     tools:context="com.joncairo.android.todo.MainActivity" >
 
     <item
-        android:id="@+id/action_settings"
-        android:orderInCategory="100"
-        android:title="Settings"
-        app:showAsAction="never"/>
-    <item
         android:id="@+id/email_all"
         android:orderInCategory="100"
         android:title="Email All"
@@ -22,6 +17,36 @@
         android:id="@+id/email_all_archived"
         android:orderInCategory="100"
         android:title="Email Archived"
-        app:showAsAction="never"/>    
+        app:showAsAction="never"/>
+    <item
+        android:id="@+id/total_todos"
+        android:orderInCategory="100"
+        android:title="Total Todos"
+        app:showAsAction="never"/> 
+    <item
+        android:id="@+id/total_checked_todos"
+        android:orderInCategory="100"
+        android:title="Total Checked Todos"
+        app:showAsAction="never"/>   
+    <item
+        android:id="@+id/total_unchecked_todos"
+        android:orderInCategory="100"
+        android:title="Total Unhecked Todos"
+        app:showAsAction="never"/>
+    <item
+        android:id="@+id/total_archived"
+        android:orderInCategory="100"
+        android:title="Total Archived"
+        app:showAsAction="never"/> 
+    <item
+        android:id="@+id/total_checked_archived"
+        android:orderInCategory="100"
+        android:title="Total Checked Archived"
+        app:showAsAction="never"/>   
+    <item
+        android:id="@+id/total_unchecked_archived"
+        android:orderInCategory="100"
+        android:title="Total Unhecked Archived"
+        app:showAsAction="never"/>      
 
 </menu>

@@ -36,6 +36,7 @@ public class ToDoFragment extends ListFragment {
 	// this is the identifier set in the constructor as to whether the
 	// instance is the todolist or the archived todolist
 	String mKeyNameForToDoList;
+	Integer mMenuId;
 	
 	
 	// This interface should be implemented in parent activity
@@ -84,7 +85,15 @@ public class ToDoFragment extends ListFragment {
         
         // make an adapter for the listview
         adapter = new ToDoAdapter(mTodos);
-        setListAdapter(adapter);       
+        setListAdapter(adapter);
+        
+        // set the contextual menu bar layout todos and archived todos
+        // have slightly different contextual action bar menus
+        if (mKeyNameForToDoList == "TODOLIST"){
+        	mMenuId = R.menu.action_bar_menu;
+        } else if (mKeyNameForToDoList == "ARCHIVEDTODOLIST"){
+        	mMenuId = R.menu.archived_action_bar_menu;
+        }
 	}
 	
 	// adapted from http://stackoverflow.com/questions/12485698/using-contextual-action-bar-with-fragments
@@ -109,10 +118,10 @@ public class ToDoFragment extends ListFragment {
 	        getListView().setMultiChoiceModeListener(new MultiChoiceModeListener() {
 
 	            private int nr = 0;
-
+	            
 	            @Override
 	            public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-	                getActivity().getMenuInflater().inflate(R.menu.action_bar_menu,
+	                getActivity().getMenuInflater().inflate(mMenuId,
 	                        menu);
 	                return true;
 	            }
@@ -125,7 +134,7 @@ public class ToDoFragment extends ListFragment {
 	            @Override
 	            public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
 	                switch (item.getItemId()) {
-	                // heres where we handle all the button clicks in the action bar.
+	                // heres where we handle all the button clicks in the contextual action bar.
 	                case R.id.email:
 	                    emailSelectedItems();
 	                    mode.finish();
@@ -140,6 +149,21 @@ public class ToDoFragment extends ListFragment {
 	                	archiveSelectedItems();
 	                	mode.finish();
 	                	break;
+	                
+	                case R.id.unarchive:
+                		archiveSelectedItems();
+                		mode.finish();
+                		break;
+                		
+	                case R.id.archived_delete:
+                		// call subroutine to delete the items currently selected				
+						deleteSelectedItems();				
+						mode.finish();
+						break;
+	                case R.id.archived_email:
+                    	emailSelectedItems();
+                    	mode.finish();
+                    	break;
 	                }
 	                return false;
 	            }
@@ -202,12 +226,12 @@ public class ToDoFragment extends ListFragment {
         ArrayList<Todo> mToDosToBeArchived = new ArrayList<Todo>();
         for (int index = 0; index<chosenItemsPositions.size(); index++){
         	if(chosenItemsPositions.valueAt(index)){
-        		Todo toDoToBeArchived = mTodos.get(index-index);
-        		mToDosToBeArchived.add(toDoToBeArchived);
         		// this funky bit adjust for the fact that when we delete
         		// something from the arraylist of todoitems the positions
         		// in the list change. To adjust you just subtract the number
-        		// of items already removed from the position your deleting.            
+        		// of items already removed from the position your deleting.
+        		Todo toDoToBeArchived = mTodos.get(chosenItemsPositions.keyAt(index)-index);
+        		mToDosToBeArchived.add(toDoToBeArchived);            
         		mTodos.remove(chosenItemsPositions.keyAt(index)-index);
         		adapter.notifyDataSetChanged();                 	
         	}
@@ -316,5 +340,21 @@ public class ToDoFragment extends ListFragment {
 			mTodos.add(0, todo);
 			adapter.notifyDataSetChanged();
 		}
+	}
+	
+	public ArrayList<Integer> totalCheckedAndUncheckedItems(){
+		ArrayList<Integer> checkedUnchedCountArray = new ArrayList<Integer>();
+		Integer totalUnchecked = 0;
+		Integer totalChecked = 0;
+		for (int i = 0; i<mTodos.size(); i++){
+			if(mTodos.get(i).getDone()){
+				totalChecked++;
+			} else {
+				totalUnchecked++;
+			}
+		}
+		checkedUnchedCountArray.add(totalChecked);
+		checkedUnchedCountArray.add(totalUnchecked);
+		return checkedUnchedCountArray;
 	}
 }

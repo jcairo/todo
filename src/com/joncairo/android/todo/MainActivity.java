@@ -3,6 +3,7 @@ package com.joncairo.android.todo;
 import java.util.ArrayList;
 import java.util.Locale;
 
+import android.content.ClipData.Item;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -41,6 +42,10 @@ public class MainActivity extends ActionBarActivity implements
 	ToDoFragment mtoDoFragment;
 	ToDoFragment mArchivedToDoFragment;
 	String mAppDataFileName = "TODODATAKEY";
+	// these names identify the instances of the listfragment
+	// one is the todolist and the other is the archived todolist.
+	String mToDoListId = "TODOLIST";
+	String mArchivedToDoListId = "ARCHIVEDTODOLIST";
 
 	// this is a communication method built to communicate between
 	// the todofragment and the activity itself.
@@ -53,9 +58,9 @@ public class MainActivity extends ActionBarActivity implements
 		// if we are adding to the archive the message is coming from the 
 		// "TODOLIST", if its coming the "ARCHIVEDTODOLIST then we add it
 		// to the TODOLIST
-		if (listName == "TODOLIST"){
+		if (listName == mToDoListId){
 			mArchivedToDoFragment.addItemToToDoList(todos, listName);
-		} else if (listName == "ARCHIVEDTODOLIST") {
+		} else if (listName == mArchivedToDoListId) {
 			mtoDoFragment.addItemToToDoList(todos, listName);
 		}
 	}
@@ -64,11 +69,11 @@ public class MainActivity extends ActionBarActivity implements
 	// the todofragment and the activity itself.
 	// it should take the todo received and add it to the 
 	// archived todo list
-	public void onToDoUnArchived(Todo todo){
-		Log.v("Main activity", "main activity sees unarchiving");
-		mtoDoFragment.mTodos.add(todo);
-		mtoDoFragment.adapter.notifyDataSetChanged();
-	}
+//	public void onToDoUnArchived(Todo todo){
+//		Log.v("Main activity", "main activity sees unarchiving");
+//		mtoDoFragment.mTodos.add(todo);
+//		mtoDoFragment.adapter.notifyDataSetChanged();
+//	}
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -133,14 +138,40 @@ public class MainActivity extends ActionBarActivity implements
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.main, menu);
+		Log.v("Menu check", "Settings pressed");
 		return true;
 	}
 
+	@Override
+	public boolean onPrepareOptionsMenu(Menu menu){
+		// get the checked/unchecked counts
+
+		MenuItem totalTodos = menu.findItem(R.id.total_todos);
+		totalTodos.setTitle("Total Todos: " + Integer.toString(mtoDoFragment.mTodos.size()));
+		ArrayList<Integer> checkedAndUncheckedTotals = mtoDoFragment.totalCheckedAndUncheckedItems();
+		MenuItem totalTodosUnchecked = menu.findItem(R.id.total_unchecked_todos);
+		MenuItem totalTodosChecked = menu.findItem(R.id.total_checked_todos);
+		totalTodosChecked.setTitle("Todos Checked: " + Integer.toString(checkedAndUncheckedTotals.get(0)));
+		totalTodosUnchecked.setTitle("Todos Unchecked: " + Integer.toString(checkedAndUncheckedTotals.get(1)));
+		
+		MenuItem totalArchivedTodos = menu.findItem(R.id.total_archived);
+		totalArchivedTodos.setTitle("Total Archived: " + Integer.toString(mArchivedToDoFragment.mTodos.size()));
+		ArrayList<Integer> checkedAndUncheckedArchivedTotals = mArchivedToDoFragment.totalCheckedAndUncheckedItems();
+		MenuItem totalArchivedTodosChecked = menu.findItem(R.id.total_checked_archived);
+		MenuItem totalArchivedTodosUnchecked = menu.findItem(R.id.total_unchecked_archived);
+		totalArchivedTodosChecked.setTitle("Archived Checked: " + Integer.toString(checkedAndUncheckedArchivedTotals.get(0)));
+		totalArchivedTodosUnchecked.setTitle("Archived Unchecked: " + Integer.toString(checkedAndUncheckedArchivedTotals.get(1)));
+		
+		return true;
+	}
+	
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		// Handle action bar item clicks here. The action bar will
 		// automatically handle clicks on the Home/Up button, so long
 		// as you specify a parent activity in AndroidManifest.xml.
+		
+		
 		
 		// create the emailer
 		Emailer emailer = new Emailer(this);
@@ -206,11 +237,11 @@ public class MainActivity extends ActionBarActivity implements
 			// Each page is referred to based on an integer index related to the tab
 			// selected
 			if (position == 0) {
-				mtoDoFragment = ToDoFragment.newInstance(position, "TODOLIST");
+				mtoDoFragment = ToDoFragment.newInstance(position, mToDoListId);
 				// Log.v("tag of fragment", mtoDoFragment.getTag());
 				return mtoDoFragment;			
 			} else {
-				mArchivedToDoFragment = ToDoFragment.newInstance(position, "ARCHIVEDTODOLIST");
+				mArchivedToDoFragment = ToDoFragment.newInstance(position, mArchivedToDoListId);
 				// Log.v("tag of fragment", mArchivedToDoFragment.getTag());
 				return mArchivedToDoFragment;	
 			}		
