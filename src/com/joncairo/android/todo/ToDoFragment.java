@@ -22,8 +22,6 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 
-// import com.joncairo.android.todo.BaseToDoFragment.ToDoAdapter;
-
 public class ToDoFragment extends ListFragment {
 	public ArrayList<Todo> mTodos;
 	public EditText mNewToDoName;
@@ -31,18 +29,19 @@ public class ToDoFragment extends ListFragment {
 	public ToDoAdapter adapter;
 	private ListView mListView;
 	private static final String TAG = "ToDoListFragment";
-	OnToDoItemArchived mToDoArchivedCallback;
+	ToggleToDoItemArchivedState mToDoArchivedCallback;
 	DataLoader mDataLoader;
 	// this is the identifier set in the constructor as to whether the
 	// instance is the todolist or the archived todolist
 	String mKeyNameForToDoList;
 	Integer mMenuId;
+	String mDataFileName;
 	
 	
-	// This interface should be implemented in parent activity
-	// it is used to communicate to the Archived todo fragment
-	// so that todos can be archived.
-	public interface OnToDoItemArchived{
+	// This interface should be implemented in the parent activity
+	// it is used to communicate between the todo/archived list fragments
+	// so that todos can be archived or unarchived.
+	public interface ToggleToDoItemArchivedState{
 		public void onToDoArchived(ArrayList<Todo> todos, String listName);
 	}
 	
@@ -51,41 +50,34 @@ public class ToDoFragment extends ListFragment {
 	@Override
 	public void onAttach(Activity activity){
 		super.onAttach(activity);
-	
         // This makes sure that the container activity has implemented
-        // the callback interface. If not, it throws an exception
+        // the callback interface. If not, it throws an exception.
         try {
-            mToDoArchivedCallback = (OnToDoItemArchived) activity;
+            mToDoArchivedCallback = (ToggleToDoItemArchivedState) activity;
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString()
-                    + " must implement OnToDoItemArchived");
+                    + " must implement ToggleToDoItemArchivedState");
         }		
 	}
 	
 	@Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // set the host activity
         
-        // getactivity returns the hosting activity
-        // then you set the title of the activity depending on what
-        // the fragment is doing.
-        // get the list of todos
-        //mTodos = ToDoList.get(getActivity()).getTodos();
-        //mTodos = new ToDoList(getActivity()).getTodos();
+        // create an empty array of todos for the list
+        mTodos = new ArrayList<Todo>();
         
-        // call the dataloader and receive back a list of mTodos
-        // which is an arraylist of todos
-        mDataLoader = new DataLoader(getActivity(), "TO_DO_DATA");
-        mTodos = mDataLoader.getData(mKeyNameForToDoList);
-        //ToDoList mLoadedData = mDataLoader.getData(mDataLoaderListName);
-        //mTodos = mLoadedData.getTodos();
-        
-        
-        
-        // make an adapter for the listview
+        // make an adapter for the listview and pass it the
+        // arraylist of todos.
         adapter = new ToDoAdapter(mTodos);
         setListAdapter(adapter);
+        
+        // set the host activity
+        // call the dataloader and receive back a list of mTodos
+        // which is an arraylist of todos then add them.
+        mDataLoader = new DataLoader(getActivity(), mDataFileName);
+        ArrayList<Todo> mLoadedTodosToBeAdded = mDataLoader.getData(mKeyNameForToDoList);
+        addItemsToList(mLoadedTodosToBeAdded, "");        
         
         // set the contextual menu bar layout todos and archived todos
         // have slightly different contextual action bar menus
@@ -208,12 +200,14 @@ public class ToDoFragment extends ListFragment {
 		
 	}
 		
-	static ToDoFragment newInstance(int num, String storageKeyNameForToDoList) {
+	static ToDoFragment newInstance(int num, String storageKeyNameForToDoList, String dataFileName) {
 		ToDoFragment f = new ToDoFragment();
 		// set the key name so the todolist references the todos
 		// and the archived list refernces the archived list.
-		f.mKeyNameForToDoList = storageKeyNameForToDoList;
 		// this variable identifies the list as either the todo list or the archived todo list
+		f.mKeyNameForToDoList = storageKeyNameForToDoList;
+		// set the datafile name the dataloader should use to lookup store data
+		f.mDataFileName = dataFileName;	
 		return f;
 	}
 	
@@ -313,11 +307,11 @@ public class ToDoFragment extends ListFragment {
 		}
 	}
 	
-	public void addItemToToDoList(ArrayList<Todo> toDosToBeAdded, String fromListName){
+	public void addItemsToList(ArrayList<Todo> toDosToBeAdded, String fromListName){
 		// the from listName variable represents which list the todos
 		// are coming from, so if they come from archivedlist we setArchive property
-		// to be false on each before they are entered and vis a vis when from the 
-		// todolist. When something is added from the task input field we just pass
+		// to be false on each before they are entered into the list and vis a vis when from the 
+		// todolist. When something is added from the input field we just pass
 		// in an empty string so the archiving doesn't get set as its set to unarchived
 		// by default on entry.
 		for (int i = 0; i < toDosToBeAdded.size(); i++){

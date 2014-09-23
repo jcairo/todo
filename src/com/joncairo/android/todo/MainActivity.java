@@ -19,23 +19,12 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
-import com.joncairo.android.todo.ToDoFragment.OnToDoItemArchived;
+import com.joncairo.android.todo.ToDoFragment.ToggleToDoItemArchivedState;
 
 public class MainActivity extends ActionBarActivity implements
-		ActionBar.TabListener, OnToDoItemArchived {
-
-	/**
-	 * The {@link android.support.v4.view.PagerAdapter} that will provide
-	 * fragments for each of the sections. We use a {@link FragmentPagerAdapter}
-	 * derivative, which will keep every loaded fragment in memory. If this
-	 * becomes too memory intensive, it may be best to switch to a
-	 * {@link android.support.v4.app.FragmentStatePagerAdapter}.
-	 */
+		ActionBar.TabListener, ToggleToDoItemArchivedState {
+	
 	SectionsPagerAdapter mSectionsPagerAdapter;
-
-	/**
-	 * The {@link ViewPager} that will host the section contents.
-	 */
 	ViewPager mViewPager;
 	Button mDoIt;
 	EditText mNewToDoName;
@@ -46,38 +35,30 @@ public class MainActivity extends ActionBarActivity implements
 	// one is the todolist and the other is the archived todolist.
 	String mToDoListId = "TODOLIST";
 	String mArchivedToDoListId = "ARCHIVEDTODOLIST";
+	// this is the name of the file shared preferences will access for loading saved data
+	String mDataFileName = "TO_DO_DATA";
 
 	// this is a communication method built to communicate between
-	// the todofragment and the activity itself.
-	// it should take the todo received and add it to the 
-	// archived todo list
+	// the todo and archived fragments and the activity itself.
+	// it is called when the archived state is toggled and the todo
+	// needs to be passed from todo list to archived or vis a vis.
 	public void onToDoArchived(ArrayList<Todo> todos, String listName){
 		// here we need to check which list is sending the todos
-		// to be archived/unarchived and use that info to add them to the appropriate
-		// list
+		// to be archived/unarchived and use that info to add them to the appropriate list.
 		// if we are adding to the archive the message is coming from the 
-		// "TODOLIST", if its coming the "ARCHIVEDTODOLIST then we add it
+		// "TODOLIST" fragment, if its coming the "ARCHIVEDTODOLIST then we add it
 		// to the TODOLIST
 		if (listName == mToDoListId){
-			mArchivedToDoFragment.addItemToToDoList(todos, listName);
+			mArchivedToDoFragment.addItemsToList(todos, listName);
 		} else if (listName == mArchivedToDoListId) {
-			mtoDoFragment.addItemToToDoList(todos, listName);
+			mtoDoFragment.addItemsToList(todos, listName);
 		}
 	}
-	
-	// this is a communication method built to communicate between
-	// the todofragment and the activity itself.
-	// it should take the todo received and add it to the 
-	// archived todo list
-//	public void onToDoUnArchived(Todo todo){
-//		Log.v("Main activity", "main activity sees unarchiving");
-//		mtoDoFragment.mTodos.add(todo);
-//		mtoDoFragment.adapter.notifyDataSetChanged();
-//	}
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		// set up the main activity view to be populated with fragments.
 		setContentView(R.layout.activity_main);
 
 		// Set up the action bar for tabs
@@ -129,7 +110,7 @@ public class MainActivity extends ActionBarActivity implements
 				Todo newTodo = new Todo(newToDoText);
 				mToDoToBeAdded.add(newTodo);
 				// append it to the todolist array
-				mtoDoFragment.addItemToToDoList(mToDoToBeAdded, "");	
+				mtoDoFragment.addItemsToList(mToDoToBeAdded, "");	
 			}
 		}); 
 	}
@@ -145,7 +126,6 @@ public class MainActivity extends ActionBarActivity implements
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu){
 		// get the checked/unchecked counts
-
 		MenuItem totalTodos = menu.findItem(R.id.total_todos);
 		totalTodos.setTitle("Total Todos: " + Integer.toString(mtoDoFragment.mTodos.size()));
 		ArrayList<Integer> checkedAndUncheckedTotals = mtoDoFragment.totalCheckedAndUncheckedItems();
@@ -196,16 +176,11 @@ public class MainActivity extends ActionBarActivity implements
 	        default:
 	            return super.onOptionsItemSelected(item);
 		}
-//		int id = item.getItemId();
-//		if (id == R.id.action_settings) {
-//			return true;
-//		}
-//		return super.onOptionsItemSelected(item);
 	}
 
 	@Override
 	public void onTabSelected(ActionBar.Tab tab,
-			FragmentTransaction fragmentTransaction) {
+		FragmentTransaction fragmentTransaction) {
 		// When the given tab is selected, switch to the corresponding page in
 		// the ViewPager.
 		mViewPager.setCurrentItem(tab.getPosition());
@@ -233,16 +208,15 @@ public class MainActivity extends ActionBarActivity implements
 
 		@Override
 		public Fragment getItem(int position) {
-			// getItem is called to instantiate the fragment for the given page.
+			// getItem is called to instantiate the listfragment for the given page.
 			// Each page is referred to based on an integer index related to the tab
 			// selected
 			if (position == 0) {
-				mtoDoFragment = ToDoFragment.newInstance(position, mToDoListId);
+				mtoDoFragment = ToDoFragment.newInstance(position, mToDoListId, mDataFileName);
 				// Log.v("tag of fragment", mtoDoFragment.getTag());
 				return mtoDoFragment;			
 			} else {
-				mArchivedToDoFragment = ToDoFragment.newInstance(position, mArchivedToDoListId);
-				// Log.v("tag of fragment", mArchivedToDoFragment.getTag());
+				mArchivedToDoFragment = ToDoFragment.newInstance(position, mArchivedToDoListId, mDataFileName);
 				return mArchivedToDoFragment;	
 			}		
 		}
