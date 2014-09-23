@@ -5,7 +5,7 @@ import java.util.UUID;
 
 public class Todo {
 	private String mToDoName;
-	private UUID mToDoId;
+	// private UUID mToDoId;
 	private Date mDateCreated;
 	private Boolean mDone;
 	private Boolean mArchived;

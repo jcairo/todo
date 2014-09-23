@@ -42,7 +42,7 @@ public class ToDoFragment extends ListFragment {
 	// it is used to communicate between the todo/archived list fragments
 	// so that todos can be archived or unarchived.
 	public interface ToggleToDoItemArchivedState{
-		public void onToDoArchived(ArrayList<Todo> todos, String listName);
+		public void onToDoArchivedStateToggled(ArrayList<Todo> todos, String listName);
 	}
 	
 	// on attach method taken from
@@ -89,97 +89,85 @@ public class ToDoFragment extends ListFragment {
 	}
 	
 	// adapted from http://stackoverflow.com/questions/12485698/using-contextual-action-bar-with-fragments
-		// set up the list items to activate the contextual action bar when
-		// long pressed
-		public void onActivityCreated(Bundle savedInstanceState) {
-			super.onActivityCreated(savedInstanceState);
-			// set up the contextual action bar so multiple items in the
-			// list of todos can be selected and acted on at the same time.
-			getListView().setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
-	        getListView().setOnItemLongClickListener(new OnItemLongClickListener() {
+	// set up the list items to activate the contextual action bar when
+	// long pressed
+	public void onActivityCreated(Bundle savedInstanceState) {
+		super.onActivityCreated(savedInstanceState);
+		// set up the contextual action bar so multiple items in the
+		// list of todos can be selected and acted on at the same time.
+		getListView().setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
+        getListView().setOnItemLongClickListener(new OnItemLongClickListener() {
 
-	            @Override
-	            public boolean onItemLongClick(AdapterView<?> parent, View view,
-	                    int position, long id) {
-	                ((ListView) parent).setItemChecked(position,
-	                        ((ListView) parent).isItemChecked(position));
-	                return false;
-	            }
-	        });
-	        
-	        getListView().setMultiChoiceModeListener(new MultiChoiceModeListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view,
+                    int position, long id) {
+                ((ListView) parent).setItemChecked(position,
+                        ((ListView) parent).isItemChecked(position));
+                return false;
+            }
+        });
+        
+        getListView().setMultiChoiceModeListener(new MultiChoiceModeListener() {
 
-	            private int nr = 0;
-	            
-	            @Override
-	            public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-	                getActivity().getMenuInflater().inflate(mMenuId,
-	                        menu);
-	                return true;
-	            }
+            private int nr = 0;
+            
+            @Override
+            public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+                getActivity().getMenuInflater().inflate(mMenuId,
+                        menu);
+                return true;
+            }
 
-	            @Override
-	            public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
-	                return false;
-	            }
+            @Override
+            public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+                return false;
+            }
 
-	            @Override
-	            public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
-	                switch (item.getItemId()) {
-	                // heres where we handle all the button clicks in the contextual action bar.
-	                case R.id.email:
-	                    emailSelectedItems();
-	                    mode.finish();
-	                    break;
-	                case R.id.delete:
-	                	// call subroutine to delete the items currently selected				
-						deleteSelectedItems();				
-	                	mode.finish();
-	                    break;
-	                
-	                case R.id.archive:
-	                	archiveSelectedItems();
-	                	mode.finish();
-	                	break;
-	                
-	                case R.id.unarchive:
-                		archiveSelectedItems();
-                		mode.finish();
-                		break;
-                		
-	                case R.id.archived_delete:
-                		// call subroutine to delete the items currently selected				
-						deleteSelectedItems();				
-						mode.finish();
-						break;
-	                case R.id.archived_email:
-                    	emailSelectedItems();
-                    	mode.finish();
-                    	break;
-	                }
-	                return false;
-	            }
+            @Override
+            public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+                switch (item.getItemId()) {
+                // heres where we handle all the button clicks in the contextual action bar.
+                case R.id.delete:
+					deleteSelectedItems();				
+                	mode.finish();
+                    break;        
+                case R.id.archive:
+                	archiveSelectedItems();
+                	mode.finish();
+                	break;               
+                case R.id.unarchive:
+            		archiveSelectedItems();
+            		mode.finish();
+            		break;           		
+                case R.id.archived_delete:
+					deleteSelectedItems();				
+					mode.finish();
+					break;
 
-	            @Override
-	            public void onDestroyActionMode(ActionMode mode) {
-	                nr = 0;
-	            }
+                }
+                return false;
+            }
 
-	            @Override
-	            public void onItemCheckedStateChanged(ActionMode mode,
-	                    int position, long id, boolean checked) {
-	                if (checked) {
-	                    nr++;
-	                } else {
-	                    nr--;
-	                }
-	                mode.setTitle(nr + " todos selected!");
-	            }
-	        });               
-		}
+            @Override
+            public void onDestroyActionMode(ActionMode mode) {
+                nr = 0;
+            }
+
+            @Override
+            public void onItemCheckedStateChanged(ActionMode mode,
+                    int position, long id, boolean checked) {
+                if (checked) {
+                    nr++;
+                } else {
+                    nr--;
+                }
+                mode.setTitle(nr + " todos selected!");
+            }
+        });               
+	}
 	
 	public void onListItemClick(ListView listView, View v, int position, long id) {
-        //Todo t = (Todo)(getListAdapter()).getItem(position);
+		// set the state of the to do when its checkbox is toggled
 		Todo t = ((ToDoAdapter)getListAdapter()).getItem(position);
 	   	if (t.getDone()){
 	   		t.setDone(false);
@@ -187,20 +175,18 @@ public class ToDoFragment extends ListFragment {
 	   		t.setDone(true);
     	}
     	Log.v("TAG", "List item clicked");
-    }		
-	
-		
+    }			
 		
 	// heres where we need to save the state of the list
-	@Override 
-	public void onPause(){			
-		super.onPause();
-		Log.v("DATASAVETEST", mTodos.toString());
-		mDataLoader.setData(this.mKeyNameForToDoList, mTodos);
-		
-	}
+//	@Override 
+//	public void onPause(){			
+//		super.onPause();
+//		Log.v("DATASAVETEST", mTodos.toString());
+//		mDataLoader.setData(this.mKeyNameForToDoList, mTodos);	
+//	}
 		
 	static ToDoFragment newInstance(int num, String storageKeyNameForToDoList, String dataFileName) {
+		// create a new instance of this listfragment.
 		ToDoFragment f = new ToDoFragment();
 		// set the key name so the todolist references the todos
 		// and the archived list refernces the archived list.
@@ -216,7 +202,7 @@ public class ToDoFragment extends ListFragment {
         SparseBooleanArray chosenItemsPositions = mListView.getCheckedItemPositions();
         // now that we have the positions iterate through them and remove them
         // from the todolist then update the adapter
-		// build arraylist of todos to pass to the archive
+		// build arraylist of todos to pass to the archive/todo list destination
         ArrayList<Todo> mToDosToBeArchived = new ArrayList<Todo>();
         for (int index = 0; index<chosenItemsPositions.size(); index++){
         	if(chosenItemsPositions.valueAt(index)){
@@ -226,12 +212,13 @@ public class ToDoFragment extends ListFragment {
         		// of items already removed from the position your deleting.
         		Todo toDoToBeArchived = mTodos.get(chosenItemsPositions.keyAt(index)-index);
         		mToDosToBeArchived.add(toDoToBeArchived);            
-        		mTodos.remove(chosenItemsPositions.keyAt(index)-index);
-        		adapter.notifyDataSetChanged();                 	
+        		//mTodos.remove(chosenItemsPositions.keyAt(index)-index);
+        		//adapter.notifyDataSetChanged(); 
+        		removeItemFromList(chosenItemsPositions, index);
         	}
         }	
 
-        mToDoArchivedCallback.onToDoArchived(mToDosToBeArchived, this.mKeyNameForToDoList);
+        mToDoArchivedCallback.onToDoArchivedStateToggled(mToDosToBeArchived, this.mKeyNameForToDoList);
 	}
 	
 	public void deleteSelectedItems(){
@@ -246,8 +233,13 @@ public class ToDoFragment extends ListFragment {
         		// in the list change. To adjust you just subtract the number
         		// of items already removed from the position your deleting.            
         		//removeItemFromToDoList(chosenItemsPositions.keyAt(index)-index);
-        		mTodos.remove(chosenItemsPositions.keyAt(index)-index);
-        		adapter.notifyDataSetChanged(); 
+
+        		//Integer indexToBeRemoved = chosenItemsPositions.keyAt(index)-index;
+        		//mTodos.remove(chosenItemsPositions.keyAt(index)-index);
+        		
+        		//mTodos.remove(indexToBeRemoved);
+        		//adapter.notifyDataSetChanged();
+        		removeItemFromList(chosenItemsPositions, index);
         	}
         }
 	}
@@ -332,8 +324,18 @@ public class ToDoFragment extends ListFragment {
 				// conditions
 			}
 			mTodos.add(0, todo);
-			adapter.notifyDataSetChanged();
+			adapter.notifyDataSetChanged();		
 		}
+		// update the save file
+		DataLoader dataLoader = new DataLoader(getActivity(), "TO_DO_DATA");
+		dataLoader.setData(mKeyNameForToDoList, mTodos);
+	}
+	
+	public void removeItemFromList(SparseBooleanArray booleanArray, Integer index){
+		mTodos.remove(booleanArray.keyAt(index)-index);
+		adapter.notifyDataSetChanged();
+		DataLoader dataLoader = new DataLoader(getActivity(), "TO_DO_DATA");
+		dataLoader.setData(mKeyNameForToDoList, mTodos);
 	}
 	
 	public ArrayList<Integer> totalCheckedAndUncheckedItems(){

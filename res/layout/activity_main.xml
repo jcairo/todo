@@ -8,8 +8,9 @@
 	<android.support.v4.view.ViewPager
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/pager"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:layout_above="@+id/button_text_container"
     tools:context="com.joncairo.android.todo.MainActivity" >
 	</android.support.v4.view.ViewPager>
 
@@ -36,9 +37,6 @@
 	        android:text="@string/enter_button"
 	        android:layout_alignParentRight="true" />
 
-	</RelativeLayout>
-	
-
-
+	</RelativeLayout>	
 </RelativeLayout>
 

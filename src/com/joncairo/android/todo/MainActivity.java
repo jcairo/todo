@@ -11,6 +11,7 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
+//import android.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -42,7 +43,7 @@ public class MainActivity extends ActionBarActivity implements
 	// the todo and archived fragments and the activity itself.
 	// it is called when the archived state is toggled and the todo
 	// needs to be passed from todo list to archived or vis a vis.
-	public void onToDoArchived(ArrayList<Todo> todos, String listName){
+	public void onToDoArchivedStateToggled(ArrayList<Todo> todos, String listName){
 		// here we need to check which list is sending the todos
 		// to be archived/unarchived and use that info to add them to the appropriate list.
 		// if we are adding to the archive the message is coming from the 

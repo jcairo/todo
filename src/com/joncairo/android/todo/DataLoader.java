@@ -14,7 +14,7 @@ public class DataLoader {
 	String mDataFile;
 	
 	// delete this after testing
-	ArrayList<Todo> mTodos;
+	private ArrayList<Todo> mTodos;
 	
 	// set to do list
 	// parameter specifies key value in shared prefs

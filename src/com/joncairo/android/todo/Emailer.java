@@ -8,7 +8,7 @@ import android.util.Log;
 import android.util.SparseBooleanArray;
 
 public class Emailer {
-	Context mContext;
+	private Context mContext;
 	
 	// This class should take different data structures which contain 
 	// todos and create and send emails based on them.
