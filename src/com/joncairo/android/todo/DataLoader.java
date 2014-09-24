@@ -14,7 +14,7 @@ public class DataLoader {
 	String mDataFile;
 	
 	// delete this after testing
-	private ArrayList<Todo> mTodos;
+	//private ArrayList<Todo> mTodos;
 	
 	// set to do list
 	// parameter specifies key value in shared prefs
@@ -38,6 +38,7 @@ public class DataLoader {
         String mSerializedString = sp.getString(requestedString, "NO_DATA_TO_READ");
         Gson gson = new Gson();
         // if theres no data pass an empty array list back otherwise pass the read in data.
+		ArrayList<Todo> mTodos = new ArrayList<Todo>();
         if (mSerializedString == "NO_DATA_TO_READ"){
 			mTodos = new ArrayList<Todo>();
 		} else {
@@ -54,11 +55,12 @@ public class DataLoader {
 		mContext = context;
 		// this is the main datafile for the application
 		mDataFile = keyName;
-        Gson mGson = new Gson();
+        //Gson mGson = new Gson();
 		// for testing purposes create a Todo list object and
 		// save it so we have data to work with
-		ToDoList mToDoListObject = new ToDoList(mContext);
-        ArrayList<Todo> mToDoListArray = mToDoListObject.getTodos();
-        String mserializedData = mGson.toJson(mToDoListArray);		
+		
+        //ToDoList mToDoListObject = new ToDoList(mContext);
+        //ArrayList<Todo> mToDoListArray = mToDoListObject.getTodos();
+        //String mserializedData = mGson.toJson(mToDoListArray);		
 	}
 }
